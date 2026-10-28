@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>这条没录下来 · 声音博物馆</title>
+<meta name="theme-color" content="#0a0a0c">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔊</text></svg>">
+<style>
+  :root{
+    --bg:#0a0a0c;
+    --card:rgba(255,255,255,.034);
+    --line:rgba(255,255,255,.075);
+    --ink:#ecedf1;
+    --dim:rgba(236,237,241,.66);
+    --muted:#787884;
+    --accent:#c9b6ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    min-height:100dvh;
+    background:
+      radial-gradient(110% 55% at 50% -8%, rgba(150,120,255,.10), transparent 58%),
+      var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    display:flex;align-items:center;justify-content:center;
+    padding:clamp(28px,7vh,60px) 18px;
+  }
+  .wrap{width:100%;max-width:500px;text-align:center}
+
+  /* 无声波形 */
+  .wave{
+    display:flex;align-items:center;justify-content:center;gap:4px;
+    height:88px;margin:0 auto 8px;
+  }
+  .wave i{
+    width:3px;border-radius:3px;
+    background:linear-gradient(180deg,rgba(201,182,255,.65),rgba(201,182,255,.18));
+    animation:flat 2.8s ease-in-out infinite;
+  }
+  /* 全部几乎压平 —— 像没声音 */
+  @keyframes flat{
+    0%,100%{height:4px;opacity:.32}
+    50%{height:7px;opacity:.5}
+  }
+  /* 偶尔一根突然窜起来（像找回了半秒） */
+  .wave i.spike{
+    animation:spike 4.6s cubic-bezier(.3,.9,.4,1) infinite;
+  }
+  @keyframes spike{
+    0%,42%{height:5px;opacity:.35}
+    50%{height:46px;opacity:1;background:linear-gradient(180deg,#c9b6ff,rgba(201,182,255,.3))}
+    58%{height:14px;opacity:.7}
+    66%{height:5px;opacity:.35}
+    100%{height:5px;opacity:.35}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .wave i{animation:none;height:5px}
+    .wave i.spike{animation:none;height:22px;opacity:.8}
+  }
+
+  .code{
+    margin-top:22px;font-size:11px;letter-spacing:.32em;text-indent:.32em;
+    color:rgba(120,120,132,.7);font-variant-numeric:tabular-nums;
+  }
+  h1{
+    margin-top:13px;
+    font-size:clamp(20px,5.8vw,26px);font-weight:600;letter-spacing:.03em;
+    background:linear-gradient(180deg,#fff,#a9a3c8);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .say{margin-top:11px;font-size:13.5px;color:var(--dim);min-height:1.7em}
+  .req{
+    margin-top:8px;font-size:11px;color:rgba(120,120,132,.62);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    word-break:break-all;overflow-wrap:anywhere;
+  }
+
+  /* 试试这几条 */
+  .try{
+    margin-top:28px;padding:15px 16px;
+    border:1px solid var(--line);border-radius:14px;background:var(--card);
+    text-align:left;
+  }
+  .try .lb{
+    font-size:10.5px;color:var(--muted);letter-spacing:.14em;margin-bottom:11px;
+  }
+  .picks{display:flex;flex-wrap:wrap;gap:7px}
+  .pick{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:7px 12px;border-radius:20px;cursor:pointer;
+    border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.02);
+    color:rgba(236,237,241,.68);font-family:inherit;font-size:12px;
+    transition:all .2s;-webkit-tap-highlight-color:transparent;
+  }
+  .pick:hover{border-color:rgba(201,182,255,.45);color:#fff;background:rgba(201,182,255,.06)}
+  .pick.playing{border-color:rgba(201,182,255,.6);background:rgba(201,182,255,.1);color:#fff}
+  .pick .pl{font-size:9px;opacity:.6}
+
+  /* 跳去哪 */
+  .menu{margin-top:22px;display:grid;gap:8px;text-align:left}
+  .item{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 15px;border-radius:12px;
+    border:1px solid var(--line);background:rgba(255,255,255,.022);
+    color:var(--dim);text-decoration:none;font-size:13px;
+    transition:all .22s cubic-bezier(.2,.7,.3,1);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .item:hover,.item:focus-visible{
+    border-color:rgba(201,182,255,.42);
+    background:rgba(201,182,255,.045);
+    color:var(--ink);transform:translateX(3px);outline:none;
+  }
+  .item .ic{flex:none;width:22px;text-align:center;font-size:14px;opacity:.85}
+  .item .tx{flex:1;min-width:0}
+  .item .tx b{display:block;font-weight:500}
+  .item .tx small{display:block;font-size:10.5px;color:var(--muted);margin-top:1px}
+  .item .ar{flex:none;color:rgba(255,255,255,.2);font-size:12px;transition:all .22s}
+  .item:hover .ar{color:var(--accent);transform:translateX(2px)}
+
+  .foot{
+    margin-top:32px;font-size:11px;color:rgba(120,120,132,.55);
+    letter-spacing:.1em;line-height:2;
+  }
+
+  .fade{opacity:0;transform:translateY(11px);animation:in .68s cubic-bezier(.2,.7,.3,1) forwards}
+  .d1{animation-delay:.06s}.d2{animation-delay:.14s}.d3{animation-delay:.24s}
+  .d4{animation-delay:.34s}.d5{animation-delay:.45s}
+  @keyframes in{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.fade{opacity:1;transform:none;animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="wave fade" id="wave"></div>
+
+  <div class="code fade d1">NO RECORDING</div>
+  <h1 class="fade d1">这条没有录下来</h1>
+  <div class="say fade d2" id="say">找错了，这里没有声音。</div>
+  <div class="req fade d2" id="req"></div>
+
+  <div class="try fade d3">
+    <div class="lb">先听这条吧</div>
+    <div class="picks" id="picks"></div>
+  </div>
+
+  <nav class="menu fade d4">
+    <a class="item" href="/">
+      <span class="ic">🔊</span>
+      <span class="tx"><b>回声音博物馆</b><small>48 条原声，5 分钟</small></span>
+      <span class="ar">→</span>
+    </a>
+    <a class="item" href="https://xahuai.icu">
+      <span class="ic">🏠</span>
+      <span class="tx"><b>主站</b><small>xahuai.icu</small></span>
+      <span class="ar">→</span>
+    </a>
+    <a class="item" href="https://time.xahuai.icu">
+      <span class="ic">⏳</span>
+      <span class="tx"><b>时间机器</b><small>拖一下，回到某一天</small></span>
+      <span class="ar">→</span>
+    </a>
+    <a class="item" href="https://grow.xahuai.icu">
+      <span class="ic">🌱</span>
+      <span class="tx"><b>成长档案</b><small>她怎样一点点长出来的</small></span>
+      <span class="ar">→</span>
+    </a>
+  </nav>
+
+  <div class="foot fade d5">
+    声音博物馆 · 小羊 2026<br>
+    <span style="opacity:.6">没有声音的地方，比有声音的更响</span>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // 波形：30 根，第 12 根偶尔窜起来
+  var w = document.getElementById('wave'), h = '';
+  for (var i = 0; i < 30; i++){
+    var sp = (i === 12) ? ' spike' : '';
+    var delay = (i * 0.055).toFixed(2);
+    h += '<i class="' + sp.trim() + '" style="animation-delay:' + delay + 's"></i>';
+  }
+  w.innerHTML = h;
+
+  var SAYS = [
+    '找错了，这里没有声音。',
+    '这条没录下来。',
+    '录音室里没有这条。',
+    '你点的是一个空文件。',
+    '声音不见了，但波形还在。',
+    '这条被删了，或者从来没录过。'
+  ];
+  document.getElementById('say').textContent = SAYS[Math.floor(Math.random()*SAYS.length)];
+
+  var p = location.pathname + location.search;
+  if (p.length > 58) p = p.slice(0, 55) + '...';
+  document.getElementById('req').textContent = p;
+
+  // 三条推荐（真能播）
+  var PICKS = [
+    { f: 'audio/01.mp3',  n: '第一条', d: '6.0s' },
+    { f: 'audio/13.mp3',  n: '中间一条', d: '' },
+    { f: 'audio/48.mp3',  n: '最后一条', d: '' }
+  ];
+  var cur = null;
+  var pEl = document.getElementById('picks');
+  PICKS.forEach(function(it, idx){
+    var b = document.createElement('button');
+    b.className = 'pick';
+    b.innerHTML = '<span class="pl">▶</span>' + it.n + (it.d ? ' <span style="opacity:.5">' + it.d + '</span>' : '');
+    b.addEventListener('click', function(){
+      if (cur) { cur.pause(); cur = null; }
+      document.querySelectorAll('.pick').forEach(function(x){ x.classList.remove('playing'); });
+      var a = new Audio(it.f);
+      a.preload = 'auto';
+      a.addEventListener('ended', function(){ b.classList.remove('playing'); cur = null; });
+      a.addEventListener('error', function(){
+        b.innerHTML = '<span class="pl">✕</span>放不出来';
+        b.classList.remove('playing');
+      });
+      b.classList.add('playing');
+      b.innerHTML = '<span class="pl">‖</span>' + it.n;
+      cur = a;
+      a.play().catch(function(){
+        b.innerHTML = '<span class="pl">✕</span>' + it.n;
+      });
+    });
+    pEl.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
