@@ -252,6 +252,10 @@
     return m + ':' + (ss < 10 ? '0' : '') + ss;
   }
 
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
   function updateCount(){
     countEl.textContent = playedSet.size + ' / ' + DATA.length;
     pg.style.width = (playedSet.size / DATA.length * 100) + '%';
@@ -276,12 +280,12 @@
              +  '<span class="l"></span></div>';
       }
       html += '<div class="v" data-i="' + i + '">'
-           +   '<div class="idx">' + x.i + '</div>'
+           +   '<div class="idx">' + esc(x.i) + '</div>'
            +   '<div class="btn"><svg viewBox="0 0 24 24"><path d="M8 5.14v13.72L19 12z"/></svg></div>'
            +   '<div class="bar"><span></span><span></span><span></span><span></span></div>'
            +   '<div class="meta">'
-           +     '<div class="time">' + x.md + '<span class="hm">' + x.hm + '</span></div>'
-           +     (x.n ? '<div class="nm">' + x.n + '</div>' : '')
+           +     '<div class="time">' + esc(x.md) + '<span class="hm">' + esc(x.hm) + '</span></div>'
+           +     (x.n ? '<div class="nm">' + esc(x.n) + '</div>' : '')
            +   '</div>'
            +   '<div class="dur">' + x.d.toFixed(1) + '″</div>'
            + '</div>';
